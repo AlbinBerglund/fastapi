@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p id="p-tag"></p>
+    <script>
+        async function fetch_rooms() {
+            const resp = await fetch ("https://vm4430.kaj.pouta.csc.fi:8031/rooms");
+            const data = await resp.json();
+
+            for (let item of data.rooms) {
+                    document.querySelector('#p-tag').innerHTML += `<p> <h2> ${item.own_by} </h2> ${item.name} - ${item.size}</p>`;
+                }
+        }
+
+        fetch_rooms();
+    </script>
+</body>
+</html>
