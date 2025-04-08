@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotell</title>
+</head>
+
+<body>
+    <h1>Boka rum</h1>
+
+    <select id="room_id">
+        <!-- loopa rummen som <option> -->
+    </select> 
+    <select id="guest_id">
+        <option value="1">Albin</option>
+        <option value="2">Arthur</option>
+    </select>
+
+    <p id="dates">
+        Tidpunkt<br>
+        <input type="date" id="datefrom"> &ndash; 
+        <input type="date" id="dateto">
+    </p>
+
+    <p>
+        Tilläggsinfo<br>
+        <textarea id="addinfo"></textarea>
+    </p>
+
+    <h3>Bokningar</h3>
+    <ul id="bookings"></ul>
+
+    <h3>Guests</h3>
+    <ul id="guests"></ul>
+
+    <input type="button" id="btn-submit" value="Spara bokningen">
+
+
+
+    <script>
+        const API_URL = 'http://vm4430.kaj.pouta.csc.fi:8031';
+
+        async function getRooms() {
+            const resp = await fetch(`${API_URL}/rooms`);
+            const rooms = await resp.json();
+
+            
+
+            for (r of rooms) {
+                document.querySelector('#room_id').innerHTML += `
+                    <option value="${r.id}">
+                        ${r.room_number}
+                        ${r.type}
+                        ${r.price} €
+                    </option>
+                `;
+            }
+        };
+        getRooms();
+
+        async function getBookings() {
+            const resp = await fetch(`${API_URL}/bookings`);
+            const bookings = await resp.json();
+
+            document.querySelector('#bookings').innerHTML = '';
+            for (b of bookings) {
+                document.querySelector('#bookings').innerHTML += `
+                    <li>id:${b.id} room:${b.room_number} guest_id:${b.guest_name} Check-in:${b.datefrom} Check-out:${b.dateto}</li>
+                `;
+            }
+        };
+        getBookings();
+
+        async function getGuests() {
+            const resp = await fetch(`${API_URL}/guest`);
+            const guests = await resp.json();
+
+            document.querySelector('#guests').innerHTML = '';
+            for (g of guests) {
+                document.querySelector('#guests').innerHTML += `
+                    <li>id:${g.id} firstname:${g.firstname} Lastname:${g.lastname} Address:${g.address} </li>
+                `;
+            }
+        };
+        getGuests();
+
+
+
+        async function saveBooking() {
+            datefrom = document.querySelector('#datefrom').value;
+            if (!datefrom) return alert('Du måste välja startdatum');
+
+            const booking = {
+                guest_id: Number(document.querySelector('#guest_id').value),
+                room_id: Number(document.querySelector('#room_id').value),
+                datefrom: datefrom,
+                dateto: document.querySelector('#dateto').value || datefrom,
+                addinfo: document.querySelector('#addinfo').value
+            }
+
+            const resp = await fetch(`${API_URL}/bookings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            });
+
+            console.log(await resp.json());
+
+            getBookings();
+        }
+
+        document.querySelector("#btn-submit").addEventListener('click', saveBooking);
+
+    </script>
+</body>
+
+</html>
